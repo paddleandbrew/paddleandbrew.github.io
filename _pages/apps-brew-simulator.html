@@ -1,0 +1,22 @@
+---
+# Convenience redirect: /apps/brew-simulator/ -> /brew-simulator/
+# The app is deployed to /brew-simulator/ by the simulator's own CI, so that
+# path stays canonical; this only catches people who follow the /apps/ grouping
+# from the menu bar.
+permalink: /apps/brew-simulator/
+sitemap: false
+layout: null
+---
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Brew Simulator</title>
+<link rel="canonical" href="{{ '/brew-simulator/' | absolute_url }}">
+<meta name="robots" content="noindex">
+<meta http-equiv="refresh" content="0; url={{ '/brew-simulator/' | relative_url }}">
+</head>
+<body>
+<p>Redirecting to the <a href="{{ '/brew-simulator/' | relative_url }}">Brew Simulator</a>.</p>
+</body>
+</html>

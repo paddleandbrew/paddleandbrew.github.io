@@ -1,9 +1,13 @@
 # Main navigation links, rendered in the masthead.
+#
+# Minimal Mistakes' masthead nav is a flat list — it has no dropdowns — so
+# hosted apps are grouped behind an /apps/ index page rather than listed
+# individually here.
 main:
   - title: "Projects"
     url: /projects/
-  - title: "Brew Simulator"
-    url: /brew-simulator/
+  - title: "Apps"
+    url: /apps/
   - title: "Notes"
     url: /notes/
   - title: "About"

@@ -19,7 +19,7 @@ published to GitHub Pages by `.github/workflows/pages.yml`.
 | `_config.yml`              | Site and theme configuration                                        |
 | `_data/navigation.yml`     | Masthead navigation                                                 |
 | `index.html`               | Home page (intro + recent posts)                                    |
-| `_pages/`                  | Standalone pages: projects, about, notes, archives, 404             |
+| `_pages/`                  | Standalone pages: projects, apps, about, notes, archives, 404       |
 | `_posts/`                  | Research notes and write-ups                                        |
 | `_includes/`               | Local overrides of theme includes                                   |
 | `brew-simulator/`          | **Generated — do not edit.** See below.                             |
@@ -29,7 +29,10 @@ published to GitHub Pages by `.github/workflows/pages.yml`.
 `brew-simulator/` is a standalone WebAssembly app built in
 [paddleandbrew/brew-simulator](https://github.com/paddleandbrew/brew-simulator)
 and pushed into this repository by that repository's CI. It is served at
-`/brew-simulator/` and is **not** themed — Jekyll copies it through verbatim as
+`/brew-simulator/`, which stays canonical because that is where the simulator's
+CI writes it; the menu bar groups it under
+[`/apps/`](https://paddleandbrew.github.io/apps/), and `/apps/brew-simulator/`
+redirects there. The app is **not** themed — Jekyll copies it through verbatim as
 static files, and the deploy workflow then re-copies it over the build output
 and fails if the result differs from the source by a single byte.
 
