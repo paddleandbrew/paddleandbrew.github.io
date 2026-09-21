@@ -1,7 +1,7 @@
 # paddleandbrew.github.io
 
 The site of the research group at [Paddle & Brew](https://paddleandbrew.us), a
-micro-roastery in Richmond, Virginia: research notes, projects, and the hosted
+coffee roastery in Virginia: research notes, projects, and the hosted
 [Brew Simulator](https://paddleandbrew.github.io/brew-simulator/).
 
 The roastery's shop and story are at [paddleandbrew.us](https://paddleandbrew.us);

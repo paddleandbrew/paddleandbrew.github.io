@@ -1,15 +1,15 @@
 ---
 title: "About"
 permalink: /about/
-excerpt: "The research group at Paddle & Brew, a micro-roastery in Richmond, Virginia."
+excerpt: "The research group at Paddle & Brew, a coffee roastery in Virginia."
 toc: true
 toc_sticky: true
 ---
 
 ## The roastery
 
-[Paddle &amp; Brew](https://paddleandbrew.us) is a micro-roastery in Richmond,
-Virginia. It started with a neighbor, Rumie — a true coffee connoisseur — who
+[Paddle &amp; Brew](https://paddleandbrew.us) is a coffee roastery in Virginia.
+It started with a neighbor, Rumie — a true coffee connoisseur — who
 tasted a batch of home-roasted beans and said, *"This is the coffee I want to
 wake up for, every morning."* That became the job: roast every batch backed by
 science, a whole lot of love and a dash of magic.
@@ -20,7 +20,6 @@ every bean ethically sourced and ethically traded, seed to cup.
 
 - Shop and full story: [paddleandbrew.us](https://paddleandbrew.us)
 - Instagram: [@paddleandbrew](https://www.instagram.com/paddleandbrew/)
-- Richmond, Virginia — 8401 Mayland Dr, Ste S, Richmond, VA 23294
 
 ## This site
 

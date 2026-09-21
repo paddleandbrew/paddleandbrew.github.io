@@ -1,8 +1,8 @@
 # ------------------------------------------------------------------------------
 # Paddle & Brew Research — Jekyll configuration (Minimal Mistakes theme)
 #
-# This is the site of the research group at Paddle & Brew, a micro-roastery in
-# Richmond, Virginia. The roastery and shop live at https://paddleandbrew.us.
+# This is the site of the research group at Paddle & Brew, a coffee roastery in
+# Virginia. The roastery and shop live at https://paddleandbrew.us.
 # Theme docs: https://mmistakes.github.io/minimal-mistakes/docs/configuration/
 #
 # NOTE: /brew-simulator is a standalone WASM app that is deployed into this
@@ -21,7 +21,7 @@ title                    : "Paddle &amp; Brew Research"
 title_separator          : "|"
 subtitle                 : "The research group at Paddle &amp; Brew"
 name                     : "Paddle &amp; Brew"
-description              : "Coffee research from Paddle &amp; Brew, a micro-roastery in Richmond, Virginia: extraction models, measurements, and the tools we build to answer our own questions."
+description              : "Coffee research from Paddle &amp; Brew, a coffee roastery in Virginia: extraction models, measurements, and the tools we build to answer our own questions."
 url                      : "https://paddleandbrew.github.io"
 baseurl                  : ""
 repository               : "paddleandbrew/paddleandbrew.github.io"
@@ -48,8 +48,8 @@ lunr:
 # --- Author sidebar ----------------------------------------------------------
 author:
   name     : "Paddle &amp; Brew Research"
-  bio      : "The research bench at a Richmond micro-roastery. Every batch backed by science, a whole lot of love and a dash of magic."
-  location : "Richmond, Virginia"
+  bio      : "The research bench at Paddle &amp; Brew. Every batch backed by science, a whole lot of love and a dash of magic."
+  location : "Virginia"
   links:
     - label: "paddleandbrew.us"
       icon : "fas fa-fw fa-mug-hot"
