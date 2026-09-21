@@ -337,7 +337,7 @@ export function cutawayView(run, k, inputs, opts = {}) {
   parts.push(`<polyline points="${cx - 90},610 ${cx - 108},720 ${cx + 108},720 ${cx + 90},610" fill="none" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/><ellipse cx="${cx}" cy="610" rx="90" ry="${11}" fill="none" stroke="${INK}" stroke-width="2"/>`);
   parts.push(`<text x="${cx + 120}" y="676" font-family="IBM Plex Mono, monospace" font-size="14" fill="${INK}">${f0(cupG)} g · ${f2(fr.s('cup_tds_pct', 0))}% TDS</text>`);
   if (drain > 0.02) parts.push(`<text x="${cx + 14}" y="600" font-family="IBM Plex Mono, monospace" font-size="14" fill="${INK}">${f1(drain)} g/s · ${f1(fr.tds(fr.s('outflow_conc', 0)))}%</text>`);
-  return `<svg viewBox="0 0 ${W} ${H}" class="svgbox" role="img" aria-label="Half cutaway of the brewer at ${fmtTime(fr.t())}">${parts.join('')}</svg>`;
+  return `<svg viewBox="0 0 ${W} ${H}" class="svgbox cutaway" role="img" aria-label="Half cutaway of the brewer at ${fmtTime(fr.t())}">${parts.join('')}</svg>`;
 }
 
 export function probeReadings(run, k, probe) {

@@ -1,5 +1,5 @@
 // Setup: every input the model reads, grouped as in the mockup, with the input-confidence tier derived from what is known.
-import { esc, on, f0, f1, f2, BREWERS, brewerIcon, words, makeScheduler } from '../ui.js';
+import { esc, on, f0, f1, f2, BREWERS, brewerIcon, words, makeScheduler, infoBtn, infoNote } from '../ui.js';
 import { psdChart } from '../draw.js';
 
 const PLACEMENTS = ['centre', 'spiral', 'full_spiral', 'edge'];
@@ -87,8 +87,8 @@ export function Setup(root, ctx) {
           ${i.temperature.model === 'custom' ? `<div class="field"><label>Kettle temperature points: seconds, °C per line</label><textarea data-temp-points>${(i.temperature.points || []).map((p) => p.join(', ')).join('\n')}</textarea></div><div class="grid3"><div class="field"><label>Room T_env</label><input type="number" step="1" value="${i.temperature.t_env}" data-temp-num="t_env"></div></div>` : ''}
         </section>
         </div>
-        <section class="card" id="recipe"><div class="row between wrap"><h3>Recipe</h3><div class="row"><div class="field" style="width:120px"><label>Dose, g</label><input type="number" step="0.5" value="${rec.dose_g}" data-dose></div><span class="mono small muted">ratio 1 : ${f1(water / rec.dose_g)} · ${rec.pours.length} pours · ${water} g</span></div></div>
-          <div style="overflow:auto"><table class="t"><thead><tr><th>Pour</th><th>Start</th><th>Water to, g</th><th>Rate, g/s</th><th>Stream</th><th>Placement</th><th>After</th><th></th></tr></thead><tbody>
+        <section class="card" id="recipe"><div class="row between wrap"><div class="row"><h3>Recipe</h3>${infoBtn('setup.recipe')}</div><div class="row"><div class="field" style="width:120px"><label>Dose, g</label><input type="number" step="0.5" value="${rec.dose_g}" data-dose></div><span class="mono small muted">ratio 1 : ${f1(water / rec.dose_g)} · ${rec.pours.length} pours · ${water} g</span></div></div>${infoNote('setup.recipe')}
+          <div class="scroll-x"><table class="t"><thead><tr><th>Pour</th><th>Start</th><th>Water to, g</th><th>Rate, g/s</th><th>Stream</th><th>Placement</th><th>After</th><th></th></tr></thead><tbody>
           ${rec.pours.map((p, k) => `<tr><td>${k === 0 ? 'Bloom' : k + 1}</td><td><input type="number" step="1" value="${p.start_s}" data-pour="${k}" data-key="start_s"></td><td><input type="number" step="5" value="${p.water_to_g}" data-pour="${k}" data-key="water_to_g"></td><td><input type="number" step="0.5" value="${p.rate_gps}" data-pour="${k}" data-key="rate_gps"></td>
             <td><select data-pour="${k}" data-key="stream">${STREAMS.map((s) => `<option ${p.stream === s ? 'selected' : ''}>${s}</option>`).join('')}</select></td><td><select data-pour="${k}" data-key="placement">${PLACEMENTS.map((s) => `<option value="${s}" ${p.placement === s ? 'selected' : ''}>${words(s)}</option>`).join('')}</select></td><td><select data-pour="${k}" data-key="after">${AFTERS.map((s) => `<option ${p.after === s ? 'selected' : ''}>${s}</option>`).join('')}</select></td><td><button class="btn" style="height:32px;padding:0 10px" data-pour-del="${k}" aria-label="Remove pour">×</button></td></tr>`).join('')}
           </tbody></table></div>
@@ -96,7 +96,7 @@ export function Setup(root, ctx) {
         </section>
       </main>
       <aside class="col">
-        <div class="card"><h3>Input confidence</h3><div class="row">${[1, 2, 3].map((t) => `<div style="flex:1;height:8px;border-radius:4px;background:${t <= i.tier ? 'var(--ink)' : 'var(--chip)'}"></div>`).join('')}</div><div class="small muted">Tier ${i.tier} of 3</div>
+        <div class="card"><div class="row between"><h3>Input confidence</h3>${infoBtn('setup.confidence')}</div>${infoNote('setup.confidence')}<div class="row">${[1, 2, 3].map((t) => `<div style="flex:1;height:8px;border-radius:4px;background:${t <= i.tier ? 'var(--ink)' : 'var(--chip)'}"></div>`).join('')}</div><div class="small muted">Tier ${i.tier} of 3</div>
           <div class="grid2">${ctx.mem.bands ? `<div><div class="mono" style="font-size:20px">± ${f2((ctx.mem.bands.tds_pct.p90 - ctx.mem.bands.tds_pct.p10) / 2)}</div><div class="small muted">% TDS band</div></div><div><div class="mono" style="font-size:20px">± ${f1((ctx.mem.bands.ey_pct.p90 - ctx.mem.bands.ey_pct.p10) / 2)}</div><div class="small muted">% EY band</div></div>` : '<div class="small muted">Run a simulation to size the band.</div>'}</div></div>
         <div class="card" id="measure"><h3>What would narrow it</h3>
           <div class="kv"><span>Measured TDS from a past brew</span><span class="v">${ctx.fit() && ctx.fit().checks.some((c) => c.tds_in_band != null) ? 'in use' : 'to about half'}</span></div><div class="hr"></div>

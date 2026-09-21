@@ -14,7 +14,7 @@ export function QuickStart(root, ctx) {
   const q = ctx.state.quick || defaultQuick();
   ctx.state.quick = q;
   const render = () => {
-    root.innerHTML = `<div class="page phone">
+    root.innerHTML = `<div class="page flow">
       <header class="stack"><div class="eyebrow">First brew</div><div class="title">Five things, about a minute</div></header>
       <div class="stack"><div style="font-weight:600;font-size:13px">Brewer</div>
         <div class="grid4">${BREWERS.slice(0, 4).map((b) => `<button class="tile ${q.brewer === b.kind ? 'on' : ''}" data-brewer="${b.kind}">${brewerIcon(b.icon)}${b.kind === 'cone' ? 'Cone' : b.label}</button>`).join('')}</div>
@@ -57,7 +57,7 @@ export function QuickStart(root, ctx) {
 
 export function QuickResult(root, ctx) {
   const inputs = ctx.state.inputs;
-  root.innerHTML = `<div class="page phone"><header class="row between" style="align-items:flex-start"><div class="stack"><div class="eyebrow">Tier ${inputs.tier} inputs${ctx.state.sampleData ? ' · sample data' : ''}</div><div class="title">Your brew, roughly</div></div><a href="#/quick" class="btn">Edit</a></header>
+  root.innerHTML = `<div class="page flow"><header class="row between" style="align-items:flex-start"><div class="stack"><div class="eyebrow">Tier ${inputs.tier} inputs${ctx.state.sampleData ? ' · sample data' : ''}</div><div class="title">Your brew, roughly</div></div><a href="#/quick" class="btn">Edit</a></header>
     <div class="card"><span class="spin"></span> Running the ensemble…</div></div>`;
   let alive = true;
   (async () => {
@@ -66,7 +66,7 @@ export function QuickResult(root, ctx) {
       if (!alive) return;
       const s = run.result.summary;
       const bar = (b, min, max, label) => bandBar(b.p10, b.p90, b.p50, min, max, label);
-      root.innerHTML = `<div class="page phone">
+      root.innerHTML = `<div class="page flow">
         <header class="row between" style="align-items:flex-start"><div class="stack"><div class="eyebrow">Tier ${inputs.tier} inputs${ctx.state.sampleData ? ' · sample data' : ''}</div><div class="title">Your brew, roughly</div></div><a href="#/quick" class="btn">Edit</a></header>
         <section class="card dark" style="gap:14px">
           <div class="stack"><div class="row between"><span class="muted">Strength</span><span class="mono" style="font-size:20px">${f2(bands.tds_pct.p10)} to ${f2(bands.tds_pct.p90)}% TDS</span></div>${bar(bands.tds_pct, 0.9, 2.0, 'Strength band')}<div class="row between mono small muted"><span>0.9</span><span>most likely ${f2(bands.tds_pct.p50)}</span><span>2.0</span></div></div>
@@ -80,7 +80,7 @@ export function QuickResult(root, ctx) {
         <div style="flex-grow:1"></div>
         <div class="bottom-actions"><a href="#/setup" class="btn outline big">Tighten the band</a><a href="#/simulate" class="btn primary big">Watch it brew</a></div>
       </div>`;
-    } catch (e) { if (alive) root.innerHTML = `<div class="page phone"><div class="status err">${esc(e.message)}</div><a href="#/quick" class="btn">Back</a></div>`; }
+    } catch (e) { if (alive) root.innerHTML = `<div class="page flow"><div class="status err">${esc(e.message)}</div><a href="#/quick" class="btn">Back</a></div>`; }
   })();
   return () => { alive = false; };
 }

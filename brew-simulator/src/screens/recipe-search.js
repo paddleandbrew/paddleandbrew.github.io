@@ -1,12 +1,12 @@
-// Results: the recipe set from the Pareto search, the front ranked by robustness, and the explainer.
-import { esc, on, fmtTime, f0, f1, f2, pct, BREWERS, brewerLabel, words } from '../ui.js';
+// Recipe search: the recipe set from the Pareto search, the front ranked by robustness, and the explainer.
+import { esc, on, fmtTime, f0, f1, f2, pct, BREWERS, brewerLabel, words, infoBtn, infoNote } from '../ui.js';
 import { paretoPlot, pairCurves } from '../draw.js';
 
 function leverChips(l) { return [['Grind setting', l.grind], ['Pour count', l.pour_count], ['Pour timing', l.timing], ['Placement', l.placement], ['Swirl', l.swirl], [l.rate ? 'Pour rate' : 'Pour rate, no flow kettle', l.rate], ['Water recipe, locked', l.water]]; }
 
 function keyOf(ctx, target) { return JSON.stringify([ctx.state.configName, ctx.state.inputs, ctx.overrides(), target]); }
 
-export function Results(root, ctx) {
+export function RecipeSearch(root, ctx) {
   const i = ctx.state.inputs;
   const target = ctx.mem.target || (ctx.mem.target = { tds_pct: 1.5, ey_pct: 20.5, slurried_frac: 0.4 });
   let alive = true, off = [];
@@ -14,19 +14,19 @@ export function Results(root, ctx) {
   let selected = ctx.mem.selected;
   let pair = null, explanation = null, translated = null;
 
-  const leftAside = () => `<div class="card"><h3>Target cup</h3>
+  const leftAside = () => `<div class="card"><div class="row between"><h3>Target cup</h3>${infoBtn('recipe.target')}</div>${infoNote('recipe.target')}
       <div class="stack"><div class="row between small"><label for="tgt-tds">Strength</label><span class="mono">${f2(target.tds_pct)}% TDS</span></div><input id="tgt-tds" type="range" min="1.1" max="1.8" step="0.01" value="${target.tds_pct}" data-target="tds_pct"></div>
       <div class="stack"><div class="row between small"><label for="tgt-ey">Extraction</label><span class="mono">${f1(target.ey_pct)}% EY</span></div><input id="tgt-ey" type="range" min="17" max="23" step="0.1" value="${target.ey_pct}" data-target="ey_pct"></div>
       <div class="stack"><div class="row between small"><label for="tgt-bed">Contact time slurried</label><span class="mono">${f0(target.slurried_frac * 100)}%</span></div><input id="tgt-bed" type="range" min="0" max="100" step="1" value="${Math.round(target.slurried_frac * 100)}" data-target="slurried_frac"></div>
       <div class="small muted">Strength and extraction alone do not fix the cup. The third dial sets how the bed gets there.</div><button class="btn dark" data-search>Search recipes</button></div>
-    <div class="card"><h3>Levers the search may use</h3><div class="chips">${leverChips(search ? search.levers : { grind: true, pour_count: true, timing: true, placement: true, swirl: true, rate: !!i.equipment.flow_kettle, water: false }).map(([l, onn]) => `<span class="chip ${onn ? 'on' : 'off'}">${esc(l)}</span>`).join('')}</div><div class="small muted">Gated by the equipment on the Setup screen.</div></div>
-    <div class="card dashed"><h4>How to read the map</h4><div class="small muted">Each dot is a simulated recipe. Up is more forgiving of pouring error. Left is closer to your target. The joined dots are the ones nothing else beats on both.</div></div>`;
+    <div class="card"><div class="row between"><h3>Levers the search may use</h3>${infoBtn('recipe.levers')}</div>${infoNote('recipe.levers')}<div class="chips">${leverChips(search ? search.levers : { grind: true, pour_count: true, timing: true, placement: true, swirl: true, rate: !!i.equipment.flow_kettle, water: false }).map(([l, onn]) => `<span class="chip ${onn ? 'on' : 'off'}">${esc(l)}</span>`).join('')}</div><div class="small muted">Gated by the equipment on the Setup screen.</div></div>`;
+
 
   const table = () => {
     const cs = search.candidates;
-    return `<table class="t"><thead><tr><th>Recipe</th><th>Pours</th><th>Grind</th><th>TDS</th><th>EY</th><th>Slurried</th><th>Pouring tolerance</th><th>Time</th></tr></thead><tbody>
+    return `<div class="scroll-x"><table class="t"><thead><tr><th>Recipe</th><th>Pours</th><th>Grind</th><th>TDS</th><th>EY</th><th>Slurried</th><th>Pouring tolerance</th><th>Time</th></tr></thead><tbody>
       ${search.front.map((idx) => { const c = cs[idx]; return `<tr class="${idx === selected ? 'sel' : ''}" data-row="${idx}" style="cursor:pointer"><td>${esc(c.label)}${idx === selected ? ' · selected' : ''}</td><td>${c.pours}</td><td>${f1(c.inputs.grind.setting)}${c.grind_offset ? ` (${c.grind_offset > 0 ? '+' : ''}${c.grind_offset})` : ''}</td><td>${f2(c.summary.cup_tds_pct)}</td><td>${f1(c.summary.ey_pct)}%</td><td>${pct(c.summary.slurried_frac)}</td><td>± ${f1(c.robustness)} g/s</td><td>${fmtTime(c.summary.total_time_s)}</td></tr>`; }).join('')}
-    </tbody></table>`;
+    </tbody></table></div>`;
   };
 
   const rightAside = () => {
@@ -39,18 +39,18 @@ export function Results(root, ctx) {
     const b = cb ? (pair ? { ...cb, summary: pair.b.result.summary } : cb) : null;
     const cmp = (label, fa, fb) => `<div>${label}</div><div class="mono">${fa}</div><div class="mono">${b ? fb : '–'}</div>`;
     return `<div class="card"><div class="row between"><h3>${esc(a.label)} against ${b ? esc(b.label) : '–'}</h3><div class="row small"><span class="legend"><span class="swatch" style="width:14px;height:3px;background:#A8323A"></span>${esc(a.label)}</span><span class="legend"><span class="swatch" style="width:14px;height:3px;background:#211B17"></span>${b ? esc(b.label) : ''}</span></div></div>${pair ? pairCurves(pair.a, pair.b) : '<div class="small muted"><span class="spin"></span> Running both at full fidelity…</div>'}</div>
-      <div class="card"><h3>Same strength, different cup</h3><div class="grid3" style="gap:6px 10px;font-size:13px"><div></div><div class="mono">${esc(a.label)}</div><div class="mono">${b ? esc(b.label) : ''}</div>
+      <div class="card"><div class="row between"><h3>Same strength, different cup</h3>${infoBtn('recipe.compare')}</div>${infoNote('recipe.compare')}<div class="grid3" style="gap:6px 10px;font-size:13px"><div></div><div class="mono">${esc(a.label)}</div><div class="mono">${b ? esc(b.label) : ''}</div>
         ${cmp('TDS', f2(a.summary.cup_tds_pct), b && f2(b.summary.cup_tds_pct))}${cmp('Final column', `${f0(a.summary.final_column_height_mm)} mm`, b && `${f0(b.summary.final_column_height_mm)} mm`)}${cmp('Fines at paper', `+${f0(((a.summary.fines_paper_factor || 1) - 1) * 100)}%`, b && `+${f0(((b.summary.fines_paper_factor || 1) - 1) * 100)}%`)}${cmp('Wall stranding', a.summary.wall_stranding > 0.06 ? 'high' : 'low', b && (b.summary.wall_stranding > 0.06 ? 'high' : 'low'))}${cmp('Bed shape', words(a.summary.bed_shape || ''), b && words(b.summary.bed_shape || ''))}</div></div>
-      <div class="card"><div class="row between"><h3>Why they differ</h3><span class="pill">explained from solver output</span></div>${explanation ? `${explanation.paragraphs.map((p) => `<div class="small" style="font-size:13px;line-height:1.5">${esc(p)}</div>`).join('')}<div class="small muted">Every figure in this text is copied from the simulation. The explainer cannot introduce its own numbers. <span class="verdict ${explanation.check.ok ? 'ok' : 'bad'}">${explanation.check.ok ? `check passed (${explanation.check.numbers_checked} numbers)` : `check failed: ${explanation.check.invented.join(', ')}`}</span></div>` : '<div class="small muted">…</div>'}</div>`;
+      <div class="card"><div class="row between wrap"><div class="row"><h3>Why they differ</h3>${infoBtn('recipe.explain')}</div><span class="pill">explained from solver output</span></div>${infoNote('recipe.explain')}${explanation ? `${explanation.paragraphs.map((p) => `<div class="small" style="font-size:13px;line-height:1.5">${esc(p)}</div>`).join('')}<div class="small muted">Every figure in this text is copied from the simulation. The explainer cannot introduce its own numbers. <span class="verdict ${explanation.check.ok ? 'ok' : 'bad'}">${explanation.check.ok ? `check passed (${explanation.check.numbers_checked} numbers)` : `check failed: ${explanation.check.invented.join(', ')}`}</span></div>` : '<div class="small muted">…</div>'}</div>`;
   };
 
   const render = () => {
     root.innerHTML = `<div class="page three">
       <aside class="col">${leftAside()}</aside>
       <main class="col">
-        <section class="card"><div class="row between wrap"><h3>Recipe set</h3><span class="mono small muted">${search ? `${search.n_simulated} recipes simulated · ${search.front.length} on the front` : 'not searched yet'}</span></div>
+        <section class="card"><div class="row between wrap"><div class="row"><h3>Recipe set</h3>${infoBtn('recipe.map')}</div><span class="mono small muted">${search ? `${search.n_simulated} recipes simulated · ${search.front.length} on the front` : 'not searched yet'}</span></div>${infoNote('recipe.map')}
           ${search ? paretoPlot(search, selected) : `<div class="status" data-search-status>${ctx.mem.searching ? '<span class="spin"></span> Searching recipes…' : 'Set a target and search.'}</div>`}</section>
-        ${search ? `<section class="card"><h3>On the front, ranked by robustness</h3>${table()}<div class="hr"></div><div class="row wrap"><button class="btn primary" data-watch>Watch ${selected != null ? esc(search.candidates[selected].label) : ''} brew</button><button class="btn" data-export>Export recipe card</button><div class="row"><select data-translate-brewer style="height:44px;border:1px solid var(--line);border-radius:10px;background:#fff;padding:0 10px">${BREWERS.map((b) => `<option value="${b.kind}" ${b.kind === i.brewer.kind ? 'disabled' : ''}>${b.label}</option>`).join('')}</select><button class="btn" data-translate>Translate to another brewer</button></div></div>
+        ${search ? `<section class="card"><div class="row between"><h3>On the front, ranked by robustness</h3>${infoBtn('recipe.front')}</div>${infoNote('recipe.front')}${table()}<div class="hr"></div><div class="row wrap"><button class="btn primary" data-watch>Watch ${selected != null ? esc(search.candidates[selected].label) : ''} brew</button><button class="btn" data-export>Export recipe card</button><div class="row"><select data-translate-brewer style="height:44px;border:1px solid var(--line);border-radius:10px;background:#fff;padding:0 10px">${BREWERS.map((b) => `<option value="${b.kind}" ${b.kind === i.brewer.kind ? 'disabled' : ''}>${b.label}</option>`).join('')}</select><button class="btn" data-translate>Translate to another brewer</button></div></div>
           ${translated ? `<div class="status">On a ${esc(brewerLabel(translated.kind))} the selected recipe lands at ${f2(translated.summary.cup_tds_pct)}% TDS, ${f1(translated.summary.ey_pct)}% EY in ${fmtTime(translated.summary.total_time_s)} (${translated.summary.ended_by === 'drained' ? 'drained' : 'did not finish'}), against ${f2(search.candidates[selected].summary.cup_tds_pct)}% TDS here. Grind and timing are kept; only the brewer changed.</div>` : ''}</section>` : ''}
       </main>
       <aside class="col">${rightAside()}</aside>

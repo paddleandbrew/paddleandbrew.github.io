@@ -1,4 +1,6 @@
 // Tiny rendering helpers. Screens build HTML strings and wire events with delegation.
+import { PANEL } from './info.js';
+
 export const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 export const fmtTime = (s) => { if (!isFinite(s)) return '–'; s = Math.max(0, Math.round(s)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
 export const f0 = (v) => (isFinite(v) ? v.toFixed(0) : '–');
@@ -7,6 +9,23 @@ export const f2 = (v) => (isFinite(v) ? v.toFixed(2) : '–');
 export const pct = (v) => (isFinite(v) ? `${Math.round(v * 100)}%` : '–');
 export const cap = (s) => (s ? s[0].toUpperCase() + s.slice(1) : '');
 export const words = (s) => String(s || '').replace(/_/g, ' ');
+
+// Panel help. A card puts infoBtn() in its heading row and infoNote() straight after it; the note is
+// hidden until the button is pressed. Which notes are open is kept here rather than in the DOM, so a
+// screen that re-renders itself (the player redraws a whole aside every frame) does not close them.
+const openInfo = new Set();
+export function infoBtn(key) {
+  if (!PANEL[key]) return '';
+  return `<button class="info" data-info="${key}" aria-expanded="${openInfo.has(key)}" aria-label="What this panel shows" title="What this panel shows">i</button>`;
+}
+export function infoNote(key) {
+  if (!PANEL[key]) return '';
+  return `<div class="info-note ${openInfo.has(key) ? 'open' : ''}" data-info-body="${key}">${esc(PANEL[key])}</div>`;
+}
+export function toggleInfo(key) {
+  if (openInfo.has(key)) openInfo.delete(key); else openInfo.add(key);
+  return openInfo.has(key);
+}
 
 export function on(root, event, selector, handler) {
   const fn = (e) => { const el = e.target.closest(selector); if (el && root.contains(el)) handler(e, el); };

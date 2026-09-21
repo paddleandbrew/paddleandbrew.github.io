@@ -14,7 +14,7 @@ export function LogBrew(root, ctx) {
   const bands = ctx.mem.bands;
   const log = { time: pred ? fmtTime(pred.total_time_s) : '', mass: pred ? Math.round(pred.cup_mass_g) : '', tds: '', bed: pred ? pred.bed_shape : null, flavour: {}, notes: '', liking: null, consent: ctx.state.consent, split: null };
   const render = () => {
-    root.innerHTML = `<div class="page phone">
+    root.innerHTML = `<div class="page flow">
       <header class="stack"><div class="eyebrow">After the brew${lastRun ? ` · run ${esc(lastRun.id.slice(-5))}` : ''}</div><div class="title">What actually happened?</div><div class="small muted">Fill in what you have. Each line tightens the next prediction.</div></header>
       <div class="row"><div class="field" style="flex:1"><label for="l-time">Total time</label><input id="l-time" type="text" value="${esc(log.time)}" placeholder="3:22" data-f="time"><div class="hint">${pred ? `predicted ${fmtTime(pred.total_time_s)}` : 'no prediction on record'}</div></div>
         <div class="field" style="flex:1"><label for="l-mass">Cup weight</label><input id="l-mass" type="number" step="1" value="${esc(log.mass)}" data-f="mass"><div class="hint">${pred ? `predicted ${f0(pred.cup_mass_g)} g` : ''}</div></div></div>
