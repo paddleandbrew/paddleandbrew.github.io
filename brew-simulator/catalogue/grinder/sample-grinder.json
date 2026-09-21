@@ -1,0 +1,40 @@
+{
+  "id": "grinder/sample-grinder",
+  "kind": "grinder",
+  "name": "Sample grinder",
+  "version": 1,
+  "schema": 1,
+  "published_at": "2026-09-21",
+  "description": "The bundled sample grinder: five calibrated settings",
+  "data": {
+    "burrs": "sample",
+    "spread": 1.8,
+    "settings": [
+      {
+        "setting": 4,
+        "sauter_um": 300,
+        "fines_frac": 0.2
+      },
+      {
+        "setting": 5,
+        "sauter_um": 355,
+        "fines_frac": 0.17
+      },
+      {
+        "setting": 6.2,
+        "sauter_um": 412,
+        "fines_frac": 0.14
+      },
+      {
+        "setting": 7.5,
+        "sauter_um": 480,
+        "fines_frac": 0.11
+      },
+      {
+        "setting": 9,
+        "sauter_um": 560,
+        "fines_frac": 0.09
+      }
+    ]
+  }
+}

@@ -9,6 +9,9 @@ export const SCREEN = {
   '/recipe-search': 'Set the cup you want. The solver simulates about 120 recipes around your setup, keeps the ones nothing else beats on both closeness to that cup and tolerance to pouring error, and explains how the best two differ.',
   '/calibrate': 'What your logged brews did to the model. Each measured outcome pins down constants that were free, and this screen shows which ones moved, by how much, and whether the prediction band got narrower.',
   '/bench': 'The research side. Run one brew through every config, compare two variants on held-out brews, run the pre-registered falsification tests, read the parameter registry and export the data.',
+  '/workspaces': 'A workspace is a bag of coffee, a project, a set of weeks: its runs, brew logs, fits, verdicts and comments live inside it. Profiles are shared across all of them. Export one, some or all of them as a file, and import a file from another install; ids are UUIDs, so nothing collides.',
+  '/experiments': 'Every simulation this workspace has run, newest first. Name the ones worth keeping, comment on them, and open any of them again: a run record carries its inputs, config and constants, so viewing it means re-running the solver, not replaying a recording.',
+  '/profiles': 'Your beans, grinders, brewers, waters and recipes as reusable pieces. Pick one on the Setup screen and it fills that section; a grinder profile turns a setting into a grind. The catalogue on the right is published with the site: copy an entry to make it yours.',
 };
 
 export const PANEL = {
@@ -30,6 +33,12 @@ export const PANEL = {
   // Setup
   'setup.confidence': 'How much of this brew is measured rather than assumed. Tier 1 is what you can say from feel, tier 3 is measured inputs: a bean profile, a grinder profile, a water recipe. The tier sets how wide the prediction band starts out, before any brew is logged.',
   'setup.recipe': 'The pour schedule as the solver runs it. Water to is the cumulative weight in the brewer at the end of that pour, not the amount added. Rate, stream and placement feed the pour-bed coupling, which decides whether the bed is slurried or settled.',
+  // Workspaces, experiments, profiles
+  'ws.export': 'A file with the ticked workspaces and everything inside them, plus your profiles, which every workspace shares. Import merges by id: a record already here with the same id is replaced, new ones are added, nothing is removed. Replace empties this install first, for restoring a backup.',
+  'exp.detail': 'What the run was made from and what it predicted. View results runs the solver again from the stored inputs and constants; if the config or the solver has changed since, it says so rather than pretending the numbers are the same run.',
+  'exp.comments': 'Notes on this run, kept with it in the workspace. There is no author until sign-in exists; the field is there so nothing has to move later.',
+  'pf.editor': 'The profile\'s fields. A grinder is a table from setting to Sauter diameter and fines share, read off by interpolation between the rows you have calibrated and held flat past either end.',
+  'pf.catalogue': 'Profiles published with the site from the backend. They are read-only here: copy one to your profiles to use or edit it, and the copy remembers where it came from so a newer published version can be pointed out.',
   // Calibrate
   'calibrate.pinned': 'Each constant the fit was allowed to move, with the range your brews leave it in. A constant that barely moved was already consistent with your data; one still showing a wide range needs a brew that separates it from the others.',
   'calibrate.band': 'The prediction band for this setup before and after your logged brews. It narrows only where a measurement actually constrains a constant, so logging time alone narrows less than time with a measured TDS.',

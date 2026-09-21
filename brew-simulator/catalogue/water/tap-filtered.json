@@ -1,0 +1,15 @@
+{
+  "id": "water/tap-filtered",
+  "kind": "water",
+  "name": "Tap + filter",
+  "version": 1,
+  "schema": 1,
+  "published_at": "2026-09-21",
+  "description": "Typical filtered tap: GH 100, KH 60",
+  "data": {
+    "kind": "tap",
+    "gh_ppm": 100,
+    "kh_ppm": 60,
+    "mg_ca": 0.5
+  }
+}

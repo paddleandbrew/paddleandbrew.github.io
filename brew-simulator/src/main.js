@@ -15,6 +15,9 @@ import * as recipeSearch from './screens/recipe-search.js';
 import * as log from './screens/log.js';
 import * as calibrate from './screens/calibrate.js';
 import * as bench from './screens/bench.js';
+import * as workspaces from './screens/workspaces.js';
+import * as experiments from './screens/experiments.js';
+import * as profiles from './screens/profiles.js';
 import { SCREEN } from './info.js';
 
 const SCREENS = {
@@ -27,9 +30,12 @@ const SCREENS = {
   '/log': log.LogBrew,
   '/calibrate': calibrate.Calibrate,
   '/bench': bench.Bench,
+  '/workspaces': workspaces.Workspaces,
+  '/experiments': experiments.Experiments,
+  '/profiles': profiles.Profiles,
 };
 
-const NAV = [['/setup', 'Setup'], ['/simulate', 'Simulate'], ['/recipe-search', 'Recipe search'], ['/calibrate', 'Calibrate'], ['/bench', 'Bench']];
+const NAV = [['/setup', 'Setup'], ['/simulate', 'Simulate'], ['/recipe-search', 'Recipe search'], ['/calibrate', 'Calibrate'], ['/experiments', 'Experiments'], ['/profiles', 'Profiles'], ['/workspaces', 'Workspaces'], ['/bench', 'Bench']];
 
 const app = document.getElementById('app');
 const engine = new Engine();
@@ -64,6 +70,8 @@ const ctx = {
   method: /^bayes/i.test(query.get('method') || '') ? 'bayesian' : 'least_squares',
   navigate(hash) { location.hash = hash; },
   async patch(fields) { await db.patchSettings(fields); paintChrome(); },
+  // For screens that change what the header shows (the workspace) through db directly.
+  refresh() { paintChrome(); },
   async setInputs(inputs, { sample = false } = {}) { await ctx.patch({ inputs, sampleData: sample }); },
   setupId() { return (db.settings.inputs && db.settings.inputs.setup_id) || 'default'; },
   fit() { return db.fit(ctx.setupId()); },
@@ -81,12 +89,27 @@ const ctx = {
     const key = JSON.stringify([db.settings.configName, inputs, ctx.overrides()]);
     if (!force && ctx.mem.runKey === key && ctx.mem.run) return ctx.mem.run;
     const run = await engine.call('simulate', db.settings.configName, inputs, ctx.overrides(), true);
-    ctx.mem.run = run; ctx.mem.runKey = key; ctx.mem.play.k = 0; ctx.mem.play.t = 0;
+    ctx.mem.run = run; ctx.mem.runKey = key; ctx.mem.play.k = 0; ctx.mem.play.t = 0; ctx.mem.play.kf = 0;
+    ctx.mem.replayOf = null;
     // Stamp a run record (summary only) so every prediction is on the record. Records are one row
     // each in the store now, so the list is no longer capped to keep a single document small.
-    const rec = { id: uid('run'), created_at: new Date().toISOString(), inputs, config_hash: run.result.config_hash, config_name: run.result.config_name, solver_version: run.result.solver_version, summary: run.result.summary, params: run.result.params, log_id: null };
+    const rec = { id: uid(), name: null, created_at: new Date().toISOString(), inputs, config_hash: run.result.config_hash, config_name: run.result.config_name, solver_version: run.result.solver_version, summary: run.result.summary, params: run.result.params, log_id: null };
     await db.put('runs', rec);
     ctx.mem.lastRunId = rec.id;
+    return run;
+  },
+  // Run a record again from what it stored — its inputs and its parameter snapshot — without
+  // stamping a new record. The cache key is set so the Simulate screen picks this run up as-is.
+  async replay(rec) {
+    const p = rec.params;
+    const overrides = Array.isArray(p) ? Object.fromEntries(p.map((x) => [x.name, x.value])) : (p && typeof p === 'object' ? p : null);
+    const run = await engine.call('simulate', rec.config_name, rec.inputs, overrides, true);
+    await ctx.patch({ inputs: structuredClone(rec.inputs), sampleData: false });
+    ctx.mem.run = run; ctx.mem.runKey = JSON.stringify([db.settings.configName, db.settings.inputs, ctx.overrides()]);
+    ctx.mem.play.k = 0; ctx.mem.play.t = 0; ctx.mem.play.kf = 0; ctx.mem.play.playing = false;
+    ctx.mem.bands = null; ctx.mem.bandsKey = null;
+    ctx.mem.lastRunId = rec.id;
+    ctx.mem.replayOf = { id: rec.id, exact: run.result.config_hash === rec.config_hash && run.result.solver_version === rec.solver_version };
     return run;
   },
   async bandsFor(inputs = db.settings.inputs, n = 16) {
@@ -107,7 +130,7 @@ function headerTpl(path) {
   return html`<div class="row hdr-left"><a href="#/quick" class="brand">Brew Simulator</a>
     <nav>${NAV.map(([p, l]) => html`<a href="#${p}" class=${sim === p ? 'on' : ''}>${l}</a>`)}</nav>
     ${path === '/simulate' ? html`<a href="#/cutaway" class="btn hide-phone" style="height:36px">Open cutaway</a>` : ''}</div>
-    <div class="right"><span class="desc">${desc}</span>${db.settings.sampleData ? html`<span class="pill">Sample data</span>` : ''}<span class="pill">Tier ${inp ? inp.tier : '–'} inputs</span></div>`;
+    <div class="right"><span class="desc">${desc}</span><a href="#/workspaces" class="pill dark" data-workspace title="Current workspace">${db.workspace()?.name || 'Workspace'}</a>${db.settings.sampleData ? html`<span class="pill">Sample data</span>` : ''}<span class="pill">Tier ${inp ? inp.tier : '–'} inputs</span></div>`;
 }
 
 // One line under the header saying what the screen is for. The panels explain themselves through
@@ -185,6 +208,31 @@ on(app, 'click', '[data-info]', (_, el) => {
   if (note) note.classList.toggle('open', open);
   el.setAttribute('aria-expanded', String(open));
 });
+
+// Installable and offline: the service worker caches the shell and the solver on first visit. When
+// a newer version has installed behind this page, a bar offers a reload rather than swapping the
+// code under a running simulation.
+const updateEl = document.createElement('div');
+shell.insertBefore(updateEl, footEl);
+function offerUpdate(worker) {
+  render(html`<div class="status" style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin:0 20px 12px"><span>A newer version of the simulator is ready.</span><button class="btn" style="height:36px" data-update>Reload to use it</button></div>`, updateEl);
+  on(updateEl, 'click', '[data-update]', () => { worker.postMessage({ type: 'SKIP_WAITING' }); });
+}
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', async () => {
+    try {
+      const reg = await navigator.serviceWorker.register('./sw.js');
+      if (reg.waiting && navigator.serviceWorker.controller) offerUpdate(reg.waiting);
+      reg.addEventListener('updatefound', () => {
+        const w = reg.installing;
+        if (!w) return;
+        w.addEventListener('statechange', () => { if (w.state === 'installed' && navigator.serviceWorker.controller) offerUpdate(w); });
+      });
+      let reloading = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => { if (!reloading) { reloading = true; location.reload(); } });
+    } catch (e) { console.warn('service worker not registered', e); }
+  });
+}
 
 window.brew = ctx; // for debugging in the console
 boot();

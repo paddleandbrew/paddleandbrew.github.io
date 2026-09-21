@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- The V60 outline the app draws for a cone brewer, on the panel colour. -->
+  <rect width="64" height="64" rx="14" fill="#FBF8F2"/>
+  <path d="M12 14 L27 50 L37 50 L52 14" fill="none" stroke="#211B17" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M19 26 L45 26" stroke="#DCECEC" stroke-width="5" stroke-linecap="round"/>
+  <path d="M24 34 L40 34" stroke="#A9784F" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="32" cy="57" r="2.6" fill="#A8323A"/>
+</svg>

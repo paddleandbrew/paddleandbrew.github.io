@@ -1,0 +1,54 @@
+{
+  "id": "recipe/four-pour-15-250",
+  "kind": "recipe",
+  "name": "Four pours, 15 : 250",
+  "version": 1,
+  "schema": 1,
+  "published_at": "2026-09-21",
+  "description": "Bloom plus three pours, Newton-cooled kettle from 94 °C",
+  "data": {
+    "recipe": {
+      "dose_g": 15,
+      "pours": [
+        {
+          "start_s": 0,
+          "water_to_g": 45,
+          "rate_gps": 4.5,
+          "stream": "smooth",
+          "placement": "full_spiral",
+          "after": "swirl"
+        },
+        {
+          "start_s": 45,
+          "water_to_g": 120,
+          "rate_gps": 3.8,
+          "stream": "smooth",
+          "placement": "spiral",
+          "after": "none"
+        },
+        {
+          "start_s": 75,
+          "water_to_g": 190,
+          "rate_gps": 4,
+          "stream": "smooth",
+          "placement": "spiral",
+          "after": "none"
+        },
+        {
+          "start_s": 120,
+          "water_to_g": 250,
+          "rate_gps": 3,
+          "stream": "broken",
+          "placement": "centre",
+          "after": "swirl"
+        }
+      ]
+    },
+    "temperature": {
+      "model": "newton",
+      "t0": 94,
+      "t_env": 22,
+      "tau": 410
+    }
+  }
+}

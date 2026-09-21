@@ -4,6 +4,8 @@ import { unsafeHTML } from '../../vendor/lit-html/directives/unsafe-html.js';
 import { live } from '../../vendor/lit-html/directives/live.js';
 import { on, f0, f1, f2, BREWERS, brewerIcon, words, infoBtn, infoNote } from '../ui.js';
 import { psdChart } from '../draw.js';
+import { PROFILE_KINDS, setupIdFor } from '../store.js';
+import { PROFILE_LABEL, applyProfile } from '../profiles.js';
 
 const PLACEMENTS = ['centre', 'spiral', 'full_spiral', 'edge'];
 const STREAMS = ['smooth', 'broken'];
@@ -52,8 +54,12 @@ export function Setup(root, ctx) {
     const rec = i.recipe;
     const water = rec.pours[rec.pours.length - 1]?.water_to_g || 0;
     const fit = ctx.fit();
+    const derived = !!(i.profile_ids && i.profile_ids.grinder && i.profile_ids.bean && i.profile_ids.brewer);
     return html`<div class="page three">
       <aside class="col">
+        <div class="card"><div class="row between"><h3>From a profile</h3><a href="#/profiles" class="small">manage</a></div>
+          ${PROFILE_KINDS.map((k) => { const list = ctx.db.profiles(k); const cur = i.profile_ids?.[k]; return html`<div class="field"><label>${PROFILE_LABEL[k]}</label><select data-pick=${k}><option value="">${list.length ? '— choose —' : `— no ${PROFILE_LABEL[k].toLowerCase()} profiles —`}</option>${list.map((p) => html`<option value=${p.id} ?selected=${p.id === cur}>${p.name}</option>`)}</select></div>`; })}
+          <div class="small muted">Picking one fills that section. The setup id is derived from the grinder, bean and brewer profiles when all three are chosen.</div></div>
         <div class="card" style="gap:2px"><h3 style="padding-bottom:6px">Sections</h3>
           ${[['#grind', 'Grind', `tier ${i.grind.source === 'feel' ? 1 : i.grind.source === 'grinder_profile' ? 2 : 3}`], ['#brewer', 'Brewer', 'tier 1'], ['#water', 'Water', i.water.kind === 'assumed average' ? 'assumed' : 'tier 2'], ['#temp', 'Temperature', i.temperature.model === 'custom' ? 'trace' : 'tier 1'], ['#recipe', 'Recipe', `${rec.pours.length} pours`], ['#measure', 'Measurements', fit ? `${fit.n_brews} brews` : 'none']].map(([h, l, t]) => html`<a href=${h} class="nav-link" data-jump=${h}><span>${l}</span><span class="tag">${t}</span></a>`)}
         </div>
@@ -114,7 +120,7 @@ export function Setup(root, ctx) {
           <div class="kv"><span>Slurry temperature trace</span><span class="v">pins the thermal module</span></div>
           <a href="#/log" class="btn">Add a measurement</a></div>
         <div class="card"><h3>Your equipment</h3><div class="chips">${[['scale', 'Scale, 0.1 g'], ['thermometer', 'Thermometer'], ['refractometer', 'Refractometer'], ['sieves', 'Sieves'], ['flow_kettle', 'Flow-rate kettle']].map(([k, l]) => html`<button class="chip ${i.equipment[k] ? 'on' : ''}" data-equip=${k}>${l}</button>`)}</div><div class="small muted">Sets which inputs we ask for and which recipe levers the search may use.</div></div>
-        <div class="card"><div class="field"><label>Setup id (grinder · bean · brewer)</label><input type="text" .value=${i.setup_id ?? ''} data-setup-id><div class="hint">fitted constants are stored per setup</div></div></div>
+        <div class="card"><div class="field"><label>Setup id (grinder · bean · brewer)</label><input type="text" .value=${derived ? setupIdFor(i) : (i.setup_id ?? '')} data-setup-id ?readonly=${derived}><div class="hint">${derived ? 'from the three profiles; fitted constants are stored per setup' : 'fitted constants are stored per setup'}</div></div></div>
         <div style="flex-grow:1"></div>
         <div class="status err" data-status style=${status ? '' : 'display:none'}>${status ?? ''}</div>
         <button class="btn primary big" data-run ?disabled=${running}>${running ? html`<span class="spin"></span> Running` : 'Run simulation'}</button>
@@ -155,11 +161,17 @@ export function Setup(root, ctx) {
     on(root, 'click', '[data-pour-add]', () => { const last = i.recipe.pours[i.recipe.pours.length - 1]; i.recipe.pours.push({ start_s: last.start_s + 40, water_to_g: last.water_to_g + 50, rate_gps: last.rate_gps, stream: 'smooth', placement: 'spiral', after: 'none' }); touch(); paint(); }),
     on(root, 'click', '[data-equip]', (_, el) => { i.equipment[el.dataset.equip] = !i.equipment[el.dataset.equip]; touch(); paint(); }),
     on(root, 'change', '[data-setup-id]', (_, el) => { i.setup_id = el.value.trim() || 'default'; touch(); }),
+    on(root, 'change', '[data-pick]', (_, el) => {
+      const p = el.value ? ctx.db.find('profiles', el.value) : null;
+      if (p) applyProfile(i, p); else if (i.profile_ids) delete i.profile_ids[el.dataset.pick];
+      i.setup_id = setupIdFor(i); touch(); paint();
+    }),
     on(root, 'click', '[data-run]', async () => {
       const err = await ctx.engine.call('validate_inputs', i);
       if (err) { status = err; paint(); return; }
       status = null;
       i.tier = tierOf(i);
+      i.setup_id = setupIdFor(i);
       await ctx.patch({ inputs: i });
       running = true; paint();
       try { await ctx.runSim(i, true); ctx.navigate('#/simulate'); } catch (e) { status = e.message; running = false; paint(); }

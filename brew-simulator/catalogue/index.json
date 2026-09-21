@@ -1,0 +1,87 @@
+{
+  "format": "brew-simulator-catalogue",
+  "version": 1,
+  "generated_at": "2026-09-21",
+  "profiles": [
+    {
+      "id": "brewer/v60-02",
+      "kind": "brewer",
+      "name": "V60 02",
+      "version": 1,
+      "path": "brewer/v60-02.json",
+      "sha256": "53abd87b9f9fc7c1e82eff1b23155b4a04612411e3d57a1ecdedb4522637860d"
+    },
+    {
+      "id": "brewer/flat-bed-185",
+      "kind": "brewer",
+      "name": "Flat bed 185",
+      "version": 1,
+      "path": "brewer/flat-bed-185.json",
+      "sha256": "18a1f77b67d362bee7c47ecb9f939159d2316a61efa3aff5eff597cab99b7af1"
+    },
+    {
+      "id": "brewer/fluted-cone",
+      "kind": "brewer",
+      "name": "Fluted cone",
+      "version": 1,
+      "path": "brewer/fluted-cone.json",
+      "sha256": "5cabb9b86430ca1f855b4e2f6b3ce11870c6f06787fbb9e7ec1a1ff6e5c16557"
+    },
+    {
+      "id": "brewer/valve-hybrid",
+      "kind": "brewer",
+      "name": "Valve hybrid",
+      "version": 1,
+      "path": "brewer/valve-hybrid.json",
+      "sha256": "cb334029d5c74f0b2da564f547790eaa20d7b28ba83de6f0e99f0fcc961a629e"
+    },
+    {
+      "id": "brewer/immersion",
+      "kind": "brewer",
+      "name": "Immersion",
+      "version": 1,
+      "path": "brewer/immersion.json",
+      "sha256": "5f1dc86f1aaa7b1d980ebe259c41e8751a6031791298196d7e4285fb464f560b"
+    },
+    {
+      "id": "bean/sample-washed-ethiopian",
+      "kind": "bean",
+      "name": "Sample washed Ethiopian",
+      "version": 1,
+      "path": "bean/sample-washed-ethiopian.json",
+      "sha256": "0f74d8f334f55f1473513e0fa02fa5c9825bf60cb9348b396ea8741f52bae9a8"
+    },
+    {
+      "id": "water/recipe-60-40",
+      "kind": "water",
+      "name": "Recipe water 60 / 40",
+      "version": 1,
+      "path": "water/recipe-60-40.json",
+      "sha256": "bfa748f3c796f0153c58637b11b9cadb5fe8df6d8a882a81299f487d84cf0417"
+    },
+    {
+      "id": "water/tap-filtered",
+      "kind": "water",
+      "name": "Tap + filter",
+      "version": 1,
+      "path": "water/tap-filtered.json",
+      "sha256": "1202b72d7ce29d5c2c50eafbcfda2720dcbccc4cf2aca445dd9b0894fa683131"
+    },
+    {
+      "id": "grinder/sample-grinder",
+      "kind": "grinder",
+      "name": "Sample grinder",
+      "version": 1,
+      "path": "grinder/sample-grinder.json",
+      "sha256": "0c6189803a0654567df3d6e3838c34feb813412d93bd023a1a7f584a0460c327"
+    },
+    {
+      "id": "recipe/four-pour-15-250",
+      "kind": "recipe",
+      "name": "Four pours, 15 : 250",
+      "version": 1,
+      "path": "recipe/four-pour-15-250.json",
+      "sha256": "91b1ce992379cfef0f5cd4c95189c2f715bbe5213a7aa6ec4fd0ce556f6d2ac9"
+    }
+  ]
+}

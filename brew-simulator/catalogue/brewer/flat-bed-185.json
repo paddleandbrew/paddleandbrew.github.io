@@ -1,0 +1,22 @@
+{
+  "id": "brewer/flat-bed-185",
+  "kind": "brewer",
+  "name": "Flat bed 185",
+  "version": 1,
+  "schema": 1,
+  "published_at": "2026-09-21",
+  "description": "Flat 60 mm bed, wave paper",
+  "data": {
+    "kind": "flat_bed",
+    "name": "Flat bed 185",
+    "top_diameter_mm": 95,
+    "half_angle_deg": 0,
+    "bed_diameter_mm": 60,
+    "lambda_w": 0.2,
+    "beta_b": 0.05,
+    "paper": "Wave",
+    "paper_resistance_scale": 1.3,
+    "preheated": true,
+    "valve_open_at_s": null
+  }
+}

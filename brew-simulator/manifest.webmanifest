@@ -1,0 +1,25 @@
+{
+  "id": "./",
+  "name": "Brew Simulator",
+  "short_name": "Brew Sim",
+  "description": "A pour-over brew simulator and test bench: a 1.5D column model of extraction with honest uncertainty bands.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#F3EEE4",
+  "theme_color": "#FBF8F2",
+  "lang": "en",
+  "categories": ["food", "education", "utilities"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ],
+  "shortcuts": [
+    { "name": "Quick start", "short_name": "Quick", "url": "./#/quick", "description": "Five inputs, a rough prediction" },
+    { "name": "Simulate", "url": "./#/simulate", "description": "Watch the current brew" },
+    { "name": "Log a brew", "short_name": "Log", "url": "./#/log", "description": "Record what happened" }
+  ]
+}

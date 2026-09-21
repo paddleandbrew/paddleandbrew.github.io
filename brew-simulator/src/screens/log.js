@@ -49,7 +49,7 @@ export function LogBrew(root, ctx) {
       const outcomes = { total_time_s: time, cup_mass_g: log.mass === '' ? null : Number(log.mass), tds_pct: log.tds === '' ? null : Number(log.tds), bed_shape: log.bed, split: log.split && ['first_mass_g', 'first_tds_pct', 'second_mass_g', 'second_tds_pct'].every((k) => isFinite(log.split[k])) ? log.split : null };
       if (outcomes.total_time_s == null && outcomes.cup_mass_g == null && outcomes.tds_pct == null && !outcomes.bed_shape) { err = 'Log at least one outcome: time, cup weight, TDS or bed shape.'; paint(); return; }
       err = null; saving = true; paint();
-      const brewLog = { id: uid('log'), created_at: new Date().toISOString(), run_id: lastRun ? lastRun.id : null, inputs: i, outcomes, flavour: { labels: Object.entries(log.flavour).filter(([, v]) => v > 0).map(([descriptor, intensity]) => ({ descriptor, intensity })), notes: log.notes, liking: log.liking }, traces: { slurry_temp_c: [], flow_rate_gps: [], inline_tds_pct: [] }, consent_pooled: !!log.consent, notes: '' };
+      const brewLog = { id: uid(), created_at: new Date().toISOString(), run_id: lastRun ? lastRun.id : null, inputs: i, outcomes, flavour: { labels: Object.entries(log.flavour).filter(([, v]) => v > 0).map(([descriptor, intensity]) => ({ descriptor, intensity })), notes: log.notes, liking: log.liking }, traces: { slurry_temp_c: [], flow_rate_gps: [], inline_tds_pct: [] }, consent_pooled: !!log.consent, notes: '' };
       await ctx.db.put('logs', brewLog);
       await ctx.patch({ consent: !!log.consent });
       // The run record now points at the brew it predicted, so the pair stays linked in the store.

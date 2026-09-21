@@ -1,0 +1,15 @@
+{
+  "id": "water/recipe-60-40",
+  "kind": "water",
+  "name": "Recipe water 60 / 40",
+  "version": 1,
+  "schema": 1,
+  "published_at": "2026-09-21",
+  "description": "GH 60, KH 40 ppm as CaCO₃, Mg:Ca 2",
+  "data": {
+    "kind": "recipe",
+    "gh_ppm": 60,
+    "kh_ppm": 40,
+    "mg_ca": 2
+  }
+}

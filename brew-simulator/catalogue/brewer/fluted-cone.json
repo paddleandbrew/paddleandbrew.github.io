@@ -1,0 +1,22 @@
+{
+  "id": "brewer/fluted-cone",
+  "kind": "brewer",
+  "name": "Fluted cone",
+  "version": 1,
+  "schema": 1,
+  "published_at": "2026-09-21",
+  "description": "60° cone with deep flutes: more open wall, more bypass",
+  "data": {
+    "kind": "fluted_cone",
+    "name": "Fluted cone",
+    "top_diameter_mm": 120,
+    "half_angle_deg": 30,
+    "bed_diameter_mm": 0,
+    "lambda_w": 0.6,
+    "beta_b": 0.18,
+    "paper": "Cone, unbleached",
+    "paper_resistance_scale": 1.1,
+    "preheated": true,
+    "valve_open_at_s": null
+  }
+}

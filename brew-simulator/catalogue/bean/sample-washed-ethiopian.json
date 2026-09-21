@@ -1,0 +1,24 @@
+{
+  "id": "bean/sample-washed-ethiopian",
+  "kind": "bean",
+  "name": "Sample washed Ethiopian",
+  "version": 1,
+  "schema": 1,
+  "published_at": "2026-09-21",
+  "description": "The bundled sample bean: washed, light-medium, profile loaded",
+  "data": {
+    "name": "Sample washed Ethiopian",
+    "roast_days": 14,
+    "max_extractable": 0.3,
+    "pool_split": null,
+    "density_kgm3": 380,
+    "agtron_whole": 72,
+    "agtron_ground": 88,
+    "moisture": null,
+    "process": "washed",
+    "origin": "Ethiopia",
+    "varietal": "heirloom",
+    "reference_fines_frac": null,
+    "profile_loaded": true
+  }
+}

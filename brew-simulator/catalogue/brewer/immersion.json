@@ -1,0 +1,22 @@
+{
+  "id": "brewer/immersion",
+  "kind": "brewer",
+  "name": "Immersion",
+  "version": 1,
+  "schema": 1,
+  "published_at": "2026-09-21",
+  "description": "Full immersion, disc paper, valve at 2:30",
+  "data": {
+    "kind": "immersion",
+    "name": "Immersion",
+    "top_diameter_mm": 90,
+    "half_angle_deg": 0,
+    "bed_diameter_mm": 90,
+    "lambda_w": 0,
+    "beta_b": 0,
+    "paper": "Disc",
+    "paper_resistance_scale": 1.5,
+    "preheated": true,
+    "valve_open_at_s": 150
+  }
+}
