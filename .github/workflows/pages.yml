@@ -7,6 +7,9 @@ name: Build and deploy site
 on:
   push:
     branches: [main]
+  # Build-only validation for proposed changes; nothing is published.
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -16,7 +19,7 @@ permissions:
 
 # Let a running deploy finish rather than cancelling it half-published.
 concurrency:
-  group: pages
+  group: pages-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -34,6 +37,7 @@ jobs:
 
       - name: Configure Pages
         id: pages
+        if: github.event_name != 'pull_request'
         uses: actions/configure-pages@v5
         with:
           # Enables Pages and switches its source to GitHub Actions if needed.
@@ -66,10 +70,12 @@ jobs:
         run: touch _site/.nojekyll
 
       - name: Upload artifact
+        if: github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v3
 
   deploy:
     needs: build
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
