@@ -1,7 +1,13 @@
-// App shell: boots the solver worker, loads the store, routes the nine screens.
+// App shell: boots the solver worker, opens the store, routes the nine screens.
+//
+// The shell is four stable containers — header, intro, screen, footer — each rendered by its own
+// lit-html call. A screen owns only `.main`, so the header can refresh when the inputs change
+// without disturbing whatever the screen has on screen, and a screen re-render never rebuilds the
+// chrome around it.
+import { html, render } from '../vendor/lit-html/lit-html.js';
 import { Engine } from './engine.js';
-import { makeStore, emptyDoc, uid } from './store.js';
-import { esc, toast, on, toggleInfo } from './ui.js';
+import { makeStore, Db, uid } from './store.js';
+import { toast, on, toggleInfo } from './ui.js';
 import * as quick from './screens/quick.js';
 import * as setup from './screens/setup.js';
 import * as simulate from './screens/simulate.js';
@@ -23,22 +29,44 @@ const SCREENS = {
   '/bench': bench.Bench,
 };
 
+const NAV = [['/setup', 'Setup'], ['/simulate', 'Simulate'], ['/recipe-search', 'Recipe search'], ['/calibrate', 'Calibrate'], ['/bench', 'Bench']];
+
 const app = document.getElementById('app');
 const engine = new Engine();
-const store = makeStore();
+const db = new Db(makeStore());
 const query = new URLSearchParams(location.search);
+
+// Built once, then reused for the life of the page.
+app.replaceChildren();
+const shell = document.createElement('div');
+shell.className = 'app';
+const hdrEl = document.createElement('header');
+hdrEl.className = 'hdr';
+const introEl = document.createElement('div');
+const mainEl = document.createElement('div');
+mainEl.className = 'main';
+const footEl = document.createElement('footer');
+footEl.className = 'foot';
+shell.append(hdrEl, introEl, mainEl, footEl);
+app.append(shell);
 
 const ctx = {
   engine,
-  store,
-  state: emptyDoc(),
+  db,
+  get settings() { return db.settings; },
+  get inputs() { return db.settings.inputs; },
+  runs() { return db.all('runs'); },
+  logs() { return db.all('logs'); },
+  verdicts() { return db.all('verdicts'); },
+  get configName() { return db.settings.configName; },
   mem: { run: null, runKey: null, bands: null, bandsKey: null, search: null, searchKey: null, pairRuns: {}, selected: null, play: { k: 0, t: 0, playing: false, speed: 1 } },
   // Inference method is switchable with ?method=ls|bayes (default least squares), per the plan.
   method: /^bayes/i.test(query.get('method') || '') ? 'bayesian' : 'least_squares',
   navigate(hash) { location.hash = hash; },
-  async save() { await store.save(ctx.state); },
-  setupId() { return (ctx.state.inputs && ctx.state.inputs.setup_id) || 'default'; },
-  fit() { return ctx.state.fits[ctx.setupId()] || null; },
+  async patch(fields) { await db.patchSettings(fields); paintChrome(); },
+  async setInputs(inputs, { sample = false } = {}) { await ctx.patch({ inputs, sampleData: sample }); },
+  setupId() { return (db.settings.inputs && db.settings.inputs.setup_id) || 'default'; },
+  fit() { return db.fit(ctx.setupId()); },
   overrides() {
     const f = ctx.fit();
     if (!f) return null;
@@ -49,107 +77,107 @@ const ctx = {
     if (f && f.samples && f.samples.length) return { source: { Samples: f.samples }, vary: f.parameters.map((p) => p.name) };
     return { source: { Prior: { width_frac: 0.5 } }, vary: ['perm_scale', 'k_kinetic', 'bypass_coeff', 'fines_mobilisation_rate', 'max_extractable'] };
   },
-  async runSim(inputs = ctx.state.inputs, force = false) {
-    const key = JSON.stringify([ctx.state.configName, inputs, ctx.overrides()]);
+  async runSim(inputs = db.settings.inputs, force = false) {
+    const key = JSON.stringify([db.settings.configName, inputs, ctx.overrides()]);
     if (!force && ctx.mem.runKey === key && ctx.mem.run) return ctx.mem.run;
-    const run = await engine.call('simulate', ctx.state.configName, inputs, ctx.overrides(), true);
+    const run = await engine.call('simulate', db.settings.configName, inputs, ctx.overrides(), true);
     ctx.mem.run = run; ctx.mem.runKey = key; ctx.mem.play.k = 0; ctx.mem.play.t = 0;
-    // Stamp a run record (summary only) so every prediction is on the record.
+    // Stamp a run record (summary only) so every prediction is on the record. Records are one row
+    // each in the store now, so the list is no longer capped to keep a single document small.
     const rec = { id: uid('run'), created_at: new Date().toISOString(), inputs, config_hash: run.result.config_hash, config_name: run.result.config_name, solver_version: run.result.solver_version, summary: run.result.summary, params: run.result.params, log_id: null };
-    ctx.state.runs = [rec, ...ctx.state.runs].slice(0, 50);
+    await db.put('runs', rec);
     ctx.mem.lastRunId = rec.id;
-    await ctx.save();
     return run;
   },
-  async bandsFor(inputs = ctx.state.inputs, n = 16) {
+  async bandsFor(inputs = db.settings.inputs, n = 16) {
     const src = ctx.bandSource();
-    const key = JSON.stringify([ctx.state.configName, inputs, src.vary, ctx.overrides(), n]);
+    const key = JSON.stringify([db.settings.configName, inputs, src.vary, ctx.overrides(), n]);
     if (ctx.mem.bandsKey === key && ctx.mem.bands) return ctx.mem.bands;
-    const b = await engine.call('prediction_bands', ctx.state.configName, inputs, ctx.overrides(), { n, seed: 7, fast: true, source: src.source, vary: src.vary });
+    const b = await engine.call('prediction_bands', db.settings.configName, inputs, ctx.overrides(), { n, seed: 7, fast: true, source: src.source, vary: src.vary });
     ctx.mem.bands = b; ctx.mem.bandsKey = key;
     return b;
   },
   toast: (m, k) => toast(app, m, k),
 };
 
+function headerTpl(path) {
+  const inp = db.settings.inputs;
+  const desc = inp ? `${inp.brewer.name} · ${inp.recipe.dose_g.toFixed(1)} g : ${inp.recipe.pours[inp.recipe.pours.length - 1].water_to_g.toFixed(0)} g · ${Math.round(inp.temperature.t0 ?? (inp.temperature.points ? inp.temperature.points[0][1] : 93))} °C` : '';
+  const sim = path === '/cutaway' ? '/simulate' : path;
+  return html`<div class="row hdr-left"><a href="#/quick" class="brand">Brew Simulator</a>
+    <nav>${NAV.map(([p, l]) => html`<a href="#${p}" class=${sim === p ? 'on' : ''}>${l}</a>`)}</nav>
+    ${path === '/simulate' ? html`<a href="#/cutaway" class="btn hide-phone" style="height:36px">Open cutaway</a>` : ''}</div>
+    <div class="right"><span class="desc">${desc}</span>${db.settings.sampleData ? html`<span class="pill">Sample data</span>` : ''}<span class="pill">Tier ${inp ? inp.tier : '–'} inputs</span></div>`;
+}
+
+// One line under the header saying what the screen is for. The panels explain themselves through
+// their own (i) buttons; this answers the question before any of them, on the way in.
+function introTpl(path, isFlow) {
+  if (isFlow || !SCREEN[path]) return '';
+  return html`<p>${SCREEN[path]}</p>`;
+}
+
+function footerTpl() {
+  const i = engine.info || {};
+  const cfg = db.settings.configName;
+  return html`<span>Solver ${i.solver || ''} · ${i.params || 0} parameters · ${i.modules || 0} modules · config <b>${typeof cfg === 'string' ? cfg : cfg.name}</b> · storage ${db.store.kind()} · inference ${ctx.method === 'bayesian' ? 'Bayesian (?method=bayes)' : 'least squares (?method=ls)'}</span><span>Solid fill or line: solver state. Dashed or hatched: illustrative.</span>`;
+}
+
+let currentPath = '/quick';
+function paintChrome() {
+  const isFlow = ['/quick', '/quick-result', '/log'].includes(currentPath);
+  render(headerTpl(currentPath), hdrEl);
+  introEl.className = isFlow || !SCREEN[currentPath] ? '' : 'intro';
+  render(introTpl(currentPath, isFlow), introEl);
+  render(footerTpl(), footEl);
+}
+
 function route() {
   const hash = location.hash.replace(/^#/, '') || '/quick';
   const path = hash.split('?')[0];
   const Screen = SCREENS[path] || SCREENS['/quick'];
   if (ctx.cleanup) { try { ctx.cleanup(); } catch (e) { /* ignore */ } ctx.cleanup = null; }
-  app.innerHTML = '';
+  currentPath = path;
   // The three phone-first screens (quick start, its result, the log) are one narrow column of flow.
   // They keep the app chrome on a wide screen, so moving between them and the dashboards is not a
   // jump between two different apps; the stylesheet drops the chrome again on a phone.
   const isFlow = ['/quick', '/quick-result', '/log'].includes(path);
-  const shell = document.createElement('div');
   shell.className = isFlow ? 'app flow' : 'app';
-  shell.appendChild(header(path));
-  if (!isFlow && SCREEN[path]) shell.appendChild(intro(path));
-  const main = document.createElement('div');
-  main.className = 'main';
-  shell.appendChild(main);
-  shell.appendChild(footer());
-  app.appendChild(shell);
+  paintChrome();
+  // Not cleared by hand: lit keeps its part state on the container, and detaching those markers
+  // behind its back leaves the next render inserting against a null parent. Rendering a different
+  // template into the same container is what drops the previous screen's DOM.
   try {
-    const cleanup = Screen(main, ctx);
+    const cleanup = Screen(mainEl, ctx);
     ctx.cleanup = typeof cleanup === 'function' ? cleanup : null;
   } catch (e) {
     console.error(e);
-    main.innerHTML = `<div class="page"><div class="status err">This screen failed to render: ${esc(e.message)}</div></div>`;
+    render(html`<div class="page"><div class="status err">This screen failed to render: ${e.message}</div></div>`, mainEl);
   }
   window.scrollTo(0, 0);
 }
 
-function header(path) {
-  const h = document.createElement('header');
-  h.className = 'hdr';
-  const inp = ctx.state.inputs;
-  const desc = inp ? `${esc(inp.brewer.name)} · ${inp.recipe.dose_g.toFixed(1)} g : ${inp.recipe.pours[inp.recipe.pours.length - 1].water_to_g.toFixed(0)} g · ${Math.round(inp.temperature.t0 ?? (inp.temperature.points ? inp.temperature.points[0][1] : 93))} °C` : '';
-  const sim = path === '/cutaway' ? '/simulate' : path;
-  h.innerHTML = `<div class="row hdr-left"><a href="#/quick" class="brand">Brew Simulator</a>
-    <nav>${[['/setup', 'Setup'], ['/simulate', 'Simulate'], ['/recipe-search', 'Recipe search'], ['/calibrate', 'Calibrate'], ['/bench', 'Bench']].map(([p, l]) => `<a href="#${p}" class="${sim === p ? 'on' : ''}">${l}</a>`).join('')}</nav>
-    ${path === '/simulate' ? '<a href="#/cutaway" class="btn hide-phone" style="height:36px">Open cutaway</a>' : ''}</div>
-    <div class="right"><span class="desc">${desc}</span>${ctx.state.sampleData ? '<span class="pill">Sample data</span>' : ''}<span class="pill">Tier ${inp ? inp.tier : '–'} inputs</span></div>`;
-  return h;
-}
-
-// One line under the header saying what the screen is for. The panels explain themselves through
-// their own (i) buttons; this answers the question before any of them, on the way in.
-function intro(path) {
-  const d = document.createElement('div');
-  d.className = 'intro';
-  d.innerHTML = `<p>${esc(SCREEN[path])}</p>`;
-  return d;
-}
-
-function footer() {
-  const f = document.createElement('footer');
-  f.className = 'foot';
-  const i = engine.info || {};
-  f.innerHTML = `<span>Solver ${esc(i.solver || '')} · ${i.params || 0} parameters · ${i.modules || 0} modules · config <b>${esc(typeof ctx.state.configName === 'string' ? ctx.state.configName : ctx.state.configName.name)}</b> · storage ${store.kind()} · inference ${ctx.method === 'bayesian' ? 'Bayesian (?method=bayes)' : 'least squares (?method=ls)'}</span><span>Solid fill or line: solver state. Dashed or hatched: illustrative.</span>`;
-  return f;
-}
-
 async function boot() {
   try {
-    ctx.state = await store.load();
+    await db.open();
     await engine.ready;
-    if (!ctx.state.inputs) {
-      ctx.state.inputs = await engine.call('sample_inputs');
-      ctx.state.sampleData = true;
-      await ctx.save();
+    if (!db.settings.inputs) {
+      await ctx.patch({ inputs: await engine.call('sample_inputs'), sampleData: true });
     }
     window.addEventListener('hashchange', route);
     route();
   } catch (e) {
     console.error(e);
-    app.innerHTML = `<div class="boot"><div class="boot-title">Brew Simulator</div><div class="status err" style="max-width:520px;margin:16px auto">The solver could not start: ${esc(e.message)}. Build it with <code>wasm-pack build crates/brew-wasm --target web --out-dir ../../web/pkg</code> and serve the <code>web</code> folder over HTTP.</div></div>`;
+    // The shell was appended with DOM APIs and lit has never rendered into `app` itself, so this
+    // clear is safe: there is no part state here to invalidate.
+    app.replaceChildren();
+    render(html`<div class="boot"><div class="boot-title">Brew Simulator</div><div class="status err" style="max-width:520px;margin:16px auto">The solver could not start: ${e.message}. Build it with <code>wasm-pack build crates/brew-wasm --target web --out-dir ../../web/pkg</code> and serve the <code>web</code> folder over HTTP.</div></div>`, app);
   }
 }
 
 // One delegated handler for every (i) button on every screen: the note it names is already in the
-// DOM, hidden, so opening it is a class away and screens need to know nothing about it.
+// DOM, hidden, so opening it is a class away and screens need to know nothing about it. The open
+// set in ui.js is the source of truth, so the next render of that screen agrees with this toggle.
 on(app, 'click', '[data-info]', (_, el) => {
   const key = el.dataset.info;
   const open = toggleInfo(key);

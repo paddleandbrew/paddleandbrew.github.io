@@ -364,13 +364,15 @@ export function probeSeriesChart(run, k, probe, W = 268, H = 110) {
   const n = run.t.length, tEnd = run.t[n - 1];
   const tds = Array.from(s, (c) => (100 * c) / (1 + c));
   const max = Math.max(0.5, ...tds);
-  const px = (i) => 24 + (run.t[i] / tEnd) * (W - 24), py = (v) => 92 - (v / max) * 80;
+  const pxT = (t) => 24 + (t / tEnd) * (W - 24), px = (i) => pxT(run.t[i]), py = (v) => 92 - (v / max) * 80;
+  const fr = new Frame(run, k);
+  const tNow = fr.t(), tdsNow = fr.tds(fr.cell('liquor_conc', probe.col, probe.cell, 0));
   const past = [], future = [];
   for (let i = 0; i < n; i++) (i <= k ? past : future).push(`${px(i).toFixed(1)},${py(tds[i]).toFixed(1)}`);
   return `<svg viewBox="0 0 ${W} ${H}" class="svgbox" role="img" aria-label="Liquor concentration at the probe over the brew"><line x1="0" y1="92" x2="${W}" y2="92" stroke="${LINE}"/>
     <polyline points="${past.join(' ')}" fill="none" stroke="${ACCENT}" stroke-width="2.4" stroke-linejoin="round"/>
     <polyline points="${[past[past.length - 1], ...future].filter(Boolean).join(' ')}" fill="none" stroke="${ACCENT}" stroke-width="2" stroke-dasharray="5 4"/>
-    <line x1="${px(k)}" y1="4" x2="${px(k)}" y2="94" stroke="${INK}" stroke-width="1.5"/><circle cx="${px(k)}" cy="${py(tds[k])}" r="4.5" fill="${ACCENT}" stroke="${PANEL}" stroke-width="1.5"/>
+    <line x1="${pxT(tNow)}" y1="4" x2="${pxT(tNow)}" y2="94" stroke="${INK}" stroke-width="1.5"/><circle cx="${pxT(tNow)}" cy="${py(tdsNow)}" r="4.5" fill="${ACCENT}" stroke="${PANEL}" stroke-width="1.5"/>
     <text x="0" y="106" font-family="IBM Plex Mono, monospace" font-size="10" fill="${MUTED}">0:00</text><text x="${W}" y="106" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="10" fill="${MUTED}">${fmtTime(tEnd)}</text>
     <text x="0" y="12" font-family="IBM Plex Mono, monospace" font-size="10" fill="${MUTED}">${f1(max)}% TDS</text></svg>`;
 }
@@ -382,6 +384,8 @@ const STATE_NAMES = { 0: 'Wetting', 1: 'Slurried', 2: 'Settled · drawdown', 3: 
 export function timeline(run, k, opts = {}) {
   const W = opts.width || 720, H = 180;
   const n = run.t.length, tEnd = run.t[n - 1];
+  // k may fall between two snapshots while playing, so the playhead uses the blended time.
+  const tNow = new Frame(run, k).t();
   const x0 = 36, x1 = W - 8;
   const px = (t) => x0 + (t / tEnd) * (x1 - x0);
   const parts = [];
@@ -432,7 +436,7 @@ export function timeline(run, k, opts = {}) {
   const step = tEnd > 360 ? 60 : 30;
   for (let t = 0; t <= tEnd; t += step) parts.push(`<text x="${px(t)}" y="176" text-anchor="${t === 0 ? 'start' : 'middle'}" font-family="IBM Plex Mono, monospace" font-size="11" fill="${MUTED}">${fmtTime(t)}</text>`);
   // Playhead
-  parts.push(`<line x1="${px(run.t[k])}" y1="8" x2="${px(run.t[k])}" y2="${yBot + 4}" stroke="${INK}" stroke-width="1.5"/>`);
+  parts.push(`<line x1="${px(tNow)}" y1="8" x2="${px(tNow)}" y2="${yBot + 4}" stroke="${INK}" stroke-width="1.5"/>`);
   return `<svg viewBox="0 0 ${W} ${H}" class="svgbox timeline" data-x0="${x0}" data-x1="${x1}" data-w="${W}" role="img" aria-label="Brew timeline">${parts.join('')}</svg>`;
 }
 

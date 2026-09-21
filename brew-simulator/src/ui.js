@@ -1,6 +1,9 @@
-// Tiny rendering helpers. Screens build HTML strings and wire events with delegation.
+// Tiny rendering helpers. Screens return lit-html templates and wire events with delegation.
+import { html, nothing } from '../vendor/lit-html/lit-html.js';
 import { PANEL } from './info.js';
 
+// lit escapes every interpolated value, so this is only for the SVG builders in draw.js, which
+// assemble markup as strings before it is handed back as one unsafe chunk.
 export const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 export const fmtTime = (s) => { if (!isFinite(s)) return '–'; s = Math.max(0, Math.round(s)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
 export const f0 = (v) => (isFinite(v) ? v.toFixed(0) : '–');
@@ -12,15 +15,16 @@ export const words = (s) => String(s || '').replace(/_/g, ' ');
 
 // Panel help. A card puts infoBtn() in its heading row and infoNote() straight after it; the note is
 // hidden until the button is pressed. Which notes are open is kept here rather than in the DOM, so a
-// screen that re-renders itself (the player redraws a whole aside every frame) does not close them.
+// screen that re-renders itself does not close them — and so the delegated handler in main.js and
+// the next render agree on the state.
 const openInfo = new Set();
 export function infoBtn(key) {
-  if (!PANEL[key]) return '';
-  return `<button class="info" data-info="${key}" aria-expanded="${openInfo.has(key)}" aria-label="What this panel shows" title="What this panel shows">i</button>`;
+  if (!PANEL[key]) return nothing;
+  return html`<button class="info" data-info=${key} aria-expanded=${openInfo.has(key)} aria-label="What this panel shows" title="What this panel shows">i</button>`;
 }
 export function infoNote(key) {
-  if (!PANEL[key]) return '';
-  return `<div class="info-note ${openInfo.has(key) ? 'open' : ''}" data-info-body="${key}">${esc(PANEL[key])}</div>`;
+  if (!PANEL[key]) return nothing;
+  return html`<div class="info-note ${openInfo.has(key) ? 'open' : ''}" data-info-body=${key}>${PANEL[key]}</div>`;
 }
 export function toggleInfo(key) {
   if (openInfo.has(key)) openInfo.delete(key); else openInfo.add(key);
@@ -41,7 +45,7 @@ export const BREWERS = [
   { kind: 'valve_hybrid', label: 'Valve hybrid', icon: 'M2 3 L17 27 L23 27 L38 3 M13 31 L27 31' },
   { kind: 'immersion', label: 'Immersion', icon: 'M6 3 L6 31 L34 31 L34 3' },
 ];
-export const brewerIcon = (path, size = 36) => `<svg width="${size}" height="${Math.round(size * 30 / 36)}" viewBox="0 0 40 34" aria-hidden="true"><path d="${path}" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"></path></svg>`;
+export const brewerIcon = (path, size = 36) => html`<svg width=${size} height=${Math.round(size * 30 / 36)} viewBox="0 0 40 34" aria-hidden="true"><path d=${path} fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"></path></svg>`;
 export const brewerLabel = (kind) => (BREWERS.find((b) => b.kind === kind) || {}).label || kind;
 
 export function liquorColor(tdsPct) {
@@ -66,16 +70,4 @@ export function toast(root, msg, kind = '') {
   el.style.display = 'block';
   clearTimeout(el._t);
   el._t = setTimeout(() => { el.style.display = 'none'; }, 3500);
-}
-
-// Re-render helper: a `change` fires on blur, which happens on mousedown of the next click. Re-rendering
-// right then would replace the button under the pointer and swallow the click. This defers the render
-// until the pointer is up (and a little after), so the click lands on the element that was pressed.
-export function makeScheduler(root, render) {
-  let down = false, timer = null;
-  const run = () => { timer = null; if (down) { timer = setTimeout(run, 60); return; } render(); };
-  root.addEventListener('pointerdown', () => { down = true; }, true);
-  root.addEventListener('pointerup', () => { down = false; }, true);
-  root.addEventListener('pointercancel', () => { down = false; }, true);
-  return () => { if (!timer) timer = setTimeout(run, 40); };
 }
