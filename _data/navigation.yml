@@ -1,0 +1,10 @@
+# Main navigation links, rendered in the masthead.
+main:
+  - title: "Projects"
+    url: /projects/
+  - title: "Brew Simulator"
+    url: /brew-simulator/
+  - title: "Notes"
+    url: /notes/
+  - title: "About"
+    url: /about/

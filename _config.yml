@@ -1,0 +1,135 @@
+# ------------------------------------------------------------------------------
+# Paddle & Brew — Jekyll configuration (Minimal Mistakes theme)
+# Theme docs: https://mmistakes.github.io/minimal-mistakes/docs/configuration/
+#
+# NOTE: /brew-simulator is a standalone WASM app that is deployed into this
+# repository by the paddleandbrew/brew-simulator CI. It has no front matter, so
+# Jekyll copies it through verbatim as static files. Do not add it to `exclude`
+# and do not add front matter to any file inside it.
+# ------------------------------------------------------------------------------
+
+# --- Theme -------------------------------------------------------------------
+theme                    : "minimal-mistakes-jekyll"
+minimal_mistakes_skin    : "dirt" # air, aqua, contrast, dark, dirt, neon, mint, plum, sunrise
+
+# --- Site --------------------------------------------------------------------
+locale                   : "en-US"
+title                    : "Paddle &amp; Brew"
+title_separator          : "|"
+subtitle                 : "Research &amp; projects"
+name                     : "Paddle &amp; Brew"
+description              : "Research notes, simulations, and small tools from Paddle &amp; Brew."
+url                      : "https://paddleandbrew.github.io"
+baseurl                  : ""
+repository               : "paddleandbrew/paddleandbrew.github.io"
+words_per_minute         : 200
+breadcrumbs              : true
+enable_copy_code_button  : true
+
+# --- Site search -------------------------------------------------------------
+search                   : true
+search_full_content      : true
+search_provider          : lunr
+lunr:
+  search_within_pages    : true
+
+# --- Author sidebar ----------------------------------------------------------
+author:
+  name   : "Paddle &amp; Brew"
+  bio    : "Simulations, measurements, and small tools — with honest uncertainty."
+  links:
+    - label: "GitHub"
+      icon : "fab fa-fw fa-github"
+      url  : "https://github.com/paddleandbrew"
+
+footer:
+  links:
+    - label: "GitHub"
+      icon : "fab fa-fw fa-github"
+      url  : "https://github.com/paddleandbrew"
+
+# --- Reading files -----------------------------------------------------------
+include:
+  - _pages
+exclude:
+  - .github
+  - .jekyll-cache
+  - CLAUDE.md
+  - Gemfile
+  - Gemfile.lock
+  - LICENSE
+  - README.md
+  - node_modules
+  - vendor
+keep_files:
+  - brew-simulator
+
+# --- Conversion --------------------------------------------------------------
+markdown: kramdown
+highlighter: rouge
+kramdown:
+  input: GFM
+  hard_wrap: false
+  auto_ids: true
+  syntax_highlighter: rouge
+
+# --- Outputting --------------------------------------------------------------
+permalink: /notes/:title/
+paginate: 5
+paginate_path: /page:num/
+timezone: America/New_York
+
+# --- Plugins -----------------------------------------------------------------
+plugins:
+  - jekyll-archives
+  - jekyll-feed
+  - jekyll-gist
+  - jekyll-include-cache
+  - jekyll-paginate
+  - jekyll-sitemap
+
+# --- Archives ----------------------------------------------------------------
+category_archive:
+  type: jekyll-archives
+  path: /categories/
+tag_archive:
+  type: jekyll-archives
+  path: /tags/
+jekyll-archives:
+  enabled:
+    - categories
+    - tags
+  layouts:
+    category: archive-taxonomy
+    tag: archive-taxonomy
+  permalinks:
+    category: /categories/:name/
+    tag: /tags/:name/
+
+# --- Sass --------------------------------------------------------------------
+sass:
+  sass_dir: _sass
+  style: compressed
+
+# --- Defaults ----------------------------------------------------------------
+defaults:
+  # _posts
+  - scope:
+      path: ""
+      type: posts
+    values:
+      layout: single
+      author_profile: true
+      read_time: true
+      comments: false
+      share: true
+      related: true
+      toc: true
+      toc_sticky: true
+  # _pages
+  - scope:
+      path: ""
+      type: pages
+    values:
+      layout: single
+      author_profile: true
