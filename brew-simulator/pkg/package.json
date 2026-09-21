@@ -1,0 +1,17 @@
+{
+  "name": "brew-wasm",
+  "type": "module",
+  "description": "WASM bindings for brew-core",
+  "version": "0.1.0",
+  "license": "MIT",
+  "files": [
+    "brew_wasm_bg.wasm",
+    "brew_wasm.js",
+    "brew_wasm.d.ts"
+  ],
+  "main": "brew_wasm.js",
+  "types": "brew_wasm.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

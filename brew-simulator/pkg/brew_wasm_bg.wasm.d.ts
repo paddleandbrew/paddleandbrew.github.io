@@ -1,0 +1,36 @@
+/* tslint:disable */
+/* eslint-disable */
+export const memory: WebAssembly.Memory;
+export const brewer_preset: (a: any) => [number, number, number];
+export const builtin_configs: () => [number, number, number];
+export const catalogue: () => [number, number, number];
+export const check_numbers: (a: number, b: number, c: any) => [number, number, number];
+export const compare_configs: (a: any, b: any, c: any, d: any, e: any) => [number, number, number];
+export const config_hash: (a: any) => [number, number, number, number];
+export const default_params: (a: any) => [number, number, number];
+export const explain_calibration: (a: any) => [number, number, number];
+export const explain_pair: (a: number, b: number, c: any, d: number, e: number, f: any) => [number, number, number];
+export const falsification_specs: () => [number, number, number];
+export const fit_setup: (a: any, b: any, c: any, d: any) => [number, number, number];
+export const flavour_dataset: (a: any, b: any, c: any) => [number, number, number];
+export const flavour_descriptors: () => [number, number, number];
+export const prediction_bands: (a: any, b: any, c: any, d: any) => [number, number, number];
+export const quick_to_inputs: (a: any) => [number, number, number];
+export const registry: () => [number, number, number];
+export const replay_log: (a: any, b: any, c: any) => [number, number, number];
+export const run_falsification: (a: any, b: any, c: any) => [number, number, number];
+export const sample_inputs: () => [number, number, number];
+export const search_recipes: (a: any, b: any, c: any, d: any, e: any, f: any) => [number, number, number];
+export const simulate: (a: any, b: any, c: any, d: number) => [number, number, number];
+export const solver_version: () => [number, number];
+export const start: () => void;
+export const synthetic_logs: (a: any, b: any, c: number, d: number, e: any) => [number, number, number];
+export const validate_inputs: (a: any) => [number, number, number];
+export const __wbindgen_malloc: (a: number, b: number) => number;
+export const __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
+export const __wbindgen_exn_store: (a: number) => void;
+export const __externref_table_alloc: () => number;
+export const __wbindgen_externrefs: WebAssembly.Table;
+export const __wbindgen_free: (a: number, b: number, c: number) => void;
+export const __externref_table_dealloc: (a: number) => void;
+export const __wbindgen_start: () => void;
