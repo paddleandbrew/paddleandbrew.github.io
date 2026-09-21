@@ -1,5 +1,8 @@
 # ------------------------------------------------------------------------------
-# Paddle & Brew — Jekyll configuration (Minimal Mistakes theme)
+# Paddle & Brew Research — Jekyll configuration (Minimal Mistakes theme)
+#
+# This is the site of the research group at Paddle & Brew, a micro-roastery in
+# Richmond, Virginia. The roastery and shop live at https://paddleandbrew.us.
 # Theme docs: https://mmistakes.github.io/minimal-mistakes/docs/configuration/
 #
 # NOTE: /brew-simulator is a standalone WASM app that is deployed into this
@@ -14,17 +17,26 @@ minimal_mistakes_skin    : "dirt" # air, aqua, contrast, dark, dirt, neon, mint,
 
 # --- Site --------------------------------------------------------------------
 locale                   : "en-US"
-title                    : "Paddle &amp; Brew"
+title                    : "Paddle &amp; Brew Research"
 title_separator          : "|"
-subtitle                 : "Research &amp; projects"
+subtitle                 : "The research group at Paddle &amp; Brew"
 name                     : "Paddle &amp; Brew"
-description              : "Research notes, simulations, and small tools from Paddle &amp; Brew."
+description              : "Coffee research from Paddle &amp; Brew, a micro-roastery in Richmond, Virginia: extraction models, measurements, and the tools we build to answer our own questions."
 url                      : "https://paddleandbrew.github.io"
 baseurl                  : ""
 repository               : "paddleandbrew/paddleandbrew.github.io"
 words_per_minute         : 200
 breadcrumbs              : true
 enable_copy_code_button  : true
+copyright                : "Paddle &amp; Brew"
+
+# Structured data for the roastery this group belongs to.
+social:
+  type                   : "Organization"
+  name                   : "Paddle &amp; Brew"
+  links:
+    - "https://paddleandbrew.us"
+    - "https://www.instagram.com/paddleandbrew/"
 
 # --- Site search -------------------------------------------------------------
 search                   : true
@@ -35,15 +47,28 @@ lunr:
 
 # --- Author sidebar ----------------------------------------------------------
 author:
-  name   : "Paddle &amp; Brew"
-  bio    : "Simulations, measurements, and small tools — with honest uncertainty."
+  name     : "Paddle &amp; Brew Research"
+  bio      : "The research bench at a Richmond micro-roastery. Every batch backed by science, a whole lot of love and a dash of magic."
+  location : "Richmond, Virginia"
   links:
+    - label: "paddleandbrew.us"
+      icon : "fas fa-fw fa-mug-hot"
+      url  : "https://paddleandbrew.us"
+    - label: "Instagram"
+      icon : "fab fa-fw fa-instagram"
+      url  : "https://www.instagram.com/paddleandbrew/"
     - label: "GitHub"
       icon : "fab fa-fw fa-github"
       url  : "https://github.com/paddleandbrew"
 
 footer:
   links:
+    - label: "paddleandbrew.us"
+      icon : "fas fa-fw fa-mug-hot"
+      url  : "https://paddleandbrew.us"
+    - label: "Instagram"
+      icon : "fab fa-fw fa-instagram"
+      url  : "https://www.instagram.com/paddleandbrew/"
     - label: "GitHub"
       icon : "fab fa-fw fa-github"
       url  : "https://github.com/paddleandbrew"

@@ -6,6 +6,10 @@ toc: true
 toc_sticky: true
 ---
 
+Tools built by the research group at [Paddle &amp; Brew](https://paddleandbrew.us)
+to answer our own questions. They are public because the answers are more useful
+when other people can poke holes in them.
+
 ## Brew Simulator
 
 A pour-over brew simulator and test bench built on a 1.5D column model of
@@ -32,3 +36,7 @@ What is in it:
 
 The simulator is developed in its own repository and deployed into this site
 automatically, so the version above is always the current build.
+
+Brewing something of ours while you test it? The coffee is at
+[paddleandbrew.us](https://paddleandbrew.us), and roast-day news goes out on
+[Instagram](https://www.instagram.com/paddleandbrew/).

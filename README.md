@@ -1,7 +1,12 @@
 # paddleandbrew.github.io
 
-The Paddle & Brew site: research notes, projects, and the hosted
+The site of the research group at [Paddle & Brew](https://paddleandbrew.us), a
+micro-roastery in Richmond, Virginia: research notes, projects, and the hosted
 [Brew Simulator](https://paddleandbrew.github.io/brew-simulator/).
+
+The roastery's shop and story are at [paddleandbrew.us](https://paddleandbrew.us);
+roast-day news is on [Instagram](https://www.instagram.com/paddleandbrew/). This
+repository is only the research side.
 
 Built with [Jekyll](https://jekyllrb.com) and the
 [Minimal Mistakes](https://mmistakes.github.io/minimal-mistakes/) theme, and

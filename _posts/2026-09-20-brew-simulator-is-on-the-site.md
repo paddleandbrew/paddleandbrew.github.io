@@ -14,6 +14,11 @@ The pour-over simulator and test bench is now published here at
 [/brew-simulator/]({{ '/brew-simulator/' | relative_url }}). Nothing about the app
 has changed in this move; it just has a home next to the notes that explain it.
 
+It is the first of the research group's tools to go public. We built it for our
+own bench at [Paddle &amp; Brew](https://paddleandbrew.us) — to argue about brew
+recipes with something better than opinions — and there is no reason to keep it
+to ourselves.
+
 ## What it does
 
 It solves a 1.5D column model of extraction: water moving down through a bed of
