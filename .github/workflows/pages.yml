@@ -1,0 +1,86 @@
+name: Build and deploy site
+
+# The site is built with Jekyll (Minimal Mistakes) and published with the
+# GitHub Pages "GitHub Actions" source. This also runs when
+# paddleandbrew/brew-simulator pushes a new build of /brew-simulator into main,
+# so the app is redeployed together with the site.
+on:
+  push:
+    branches: [main]
+  # Build-only validation for proposed changes; nothing is published.
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Let a running deploy finish rather than cancelling it half-published.
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+
+      - name: Configure Pages
+        id: pages
+        if: github.event_name != 'pull_request'
+        uses: actions/configure-pages@v5
+        with:
+          # Enables Pages and switches its source to GitHub Actions if needed.
+          enablement: true
+
+      - name: Build with Jekyll
+        env:
+          JEKYLL_ENV: production
+        run: bundle exec jekyll build --baseurl "${{ steps.pages.outputs.base_path }}"
+
+      - name: Copy brew-simulator in verbatim
+        # Jekyll already passes the app through as static files; this makes that
+        # guarantee explicit so no future theme or config change can mangle it.
+        run: |
+          set -euo pipefail
+          rm -rf _site/brew-simulator
+          mkdir -p _site/brew-simulator
+          tar -C brew-simulator -cf - . | tar -C _site/brew-simulator -xf -
+
+      - name: Verify brew-simulator deployment
+        run: |
+          set -euo pipefail
+          diff -r brew-simulator _site/brew-simulator
+          test -s _site/brew-simulator/index.html
+          test -s _site/brew-simulator/pkg/brew_wasm_bg.wasm
+          test -s _site/brew-simulator/src/main.js
+          echo "brew-simulator deployed byte-for-byte"
+
+      - name: Skip Pages post-processing
+        run: touch _site/.nojekyll
+
+      - name: Upload artifact
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v3
+
+  deploy:
+    needs: build
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

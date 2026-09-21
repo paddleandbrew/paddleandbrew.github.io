@@ -1,0 +1,18 @@
+# Main navigation links, rendered in the masthead.
+#
+# Minimal Mistakes' masthead nav is a flat list — it has no dropdowns — so
+# hosted apps are grouped behind an /apps/ index page rather than listed
+# individually here.
+main:
+  - title: "Projects"
+    url: /projects/
+  - title: "Apps"
+    url: /apps/
+  - title: "Notes"
+    url: /notes/
+  - title: "About"
+    url: /about/
+  - title: "Shop"
+    url: https://paddleandbrew.us
+  - title: "Instagram"
+    url: https://www.instagram.com/paddleandbrew/
